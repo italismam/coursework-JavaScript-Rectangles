@@ -128,23 +128,23 @@ function runAlgorithm() {
   }
 }
 
-function showNotification(message) {
-  const notification = document.createElement('div');
-  notification.classList.add('notification');
-  notification.textContent = message;
-  document.body.appendChild(notification);
+  function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.classList.add('notification');
+    notification.textContent = message;
+    document.body.appendChild(notification);
 
-  setTimeout(() => {
-      notification.style.opacity = '0';
-  }, 2000);
+    setTimeout(() => {
+        notification.style.opacity = '0';
+    }, 2000);
 
-  setTimeout(() => {
-      document.body.removeChild(notification);
-  }, 2500);
-}
+    setTimeout(() => {
+        document.body.removeChild(notification);
+    }, 2500);
+  }
 
-const style = document.createElement('style');
-document.head.appendChild(style);
+  const style = document.createElement('style');
+  document.head.appendChild(style);
 
 
   function displayResult(rectangles, overlappingRectangles) {
@@ -234,6 +234,39 @@ document.head.appendChild(style);
     reader.readAsText(file);
   }
 
-  function handleFileChange(event) {  
-      runAlgorithm();
+  function handleFileChange(event) {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
+  
+    if (file) {
+      readFileAsync(file, function(data) {
+        const lines = data.split('\n');
+        let rectangleAlgorithm;
+  
+        const algorithm = document.getElementById("algorithm").value;
+        if (algorithm === "Algorithm_1") {
+          rectangleAlgorithm = new BruteForce();
+        } else if (algorithm === "Algorithm_2") {
+          rectangleAlgorithm = new SweepLine();
+        }
+  
+        lines.forEach((line, index) => {
+          const match = line.match(/x1=(\d+); y1=(\d+); x2=(\d+); y2=(\d+);/);
+          if (match) {
+            const [, x1, y1, x2, y2] = match.map(Number);
+            rectangleAlgorithm.addRectangle(new Rectangle(x1, y1, x2, y2));
+          } else {
+            console.error(`Error in line ${index + 1}: ${line}`);
+          }
+        });
+  
+        displayResult(rectangleAlgorithm.rectangles, []);
+  
+        showNotification("File loaded. Click 'Run the algorithm' to process.");
+      });
     }
+  }
+  
+  function runAlgorithmOnClick() {
+    runAlgorithm();
+  }
